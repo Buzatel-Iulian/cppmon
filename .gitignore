@@ -5,4 +5,4 @@ test_get_info
 get_info
 GUI
 user_interface
-
+*.swp
