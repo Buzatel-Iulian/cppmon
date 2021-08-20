@@ -15,14 +15,6 @@
 #include <sys/sysinfo.h>
 
 
-void gotoxy(short x, short y) {
-#ifdef _WIN32
-    COORD coord = { x, y };
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-#else
-    printf("%c[%d;%df", 0x1B, y, x);
-#endif
-}
 
 std::uint64_t sum (std::uint64_t val[9],int lim){
 	std::uint64_t suma=0;
@@ -38,23 +30,43 @@ double digit_rm (double val, int factor = 100){
 
 enum class convert_mode {up_metric, low_metric, metric, bit_metric, imperial};
 
-std::pair < double, std::string > auto_range (uint64_t x, int factor1 = 1000, int factor2 = 10){
-
+std::pair < double, std::string > auto_range (uint64_t x, convert_mode mode = convert_mode::up_metric, int factor2 = 10){
+	constexpr int factor11 = 1000;
+	constexpr int factor12 = 1024;
 	double val = (double) x;
 	int i = 0;
-	while (val >= factor1 ){
-		val = val / factor1;
-		i++;
-		}
-	switch (i) {
-		case 0 : return std::make_pair( digit_rm( val, factor2 ) ,"_" ); 
-		case 1 : return std::make_pair( digit_rm( val, factor2 ) ,"K" ); 
-		case 2 : return std::make_pair( digit_rm( val, factor2 ) ,"M" ); 
-		case 3 : return std::make_pair( digit_rm( val, factor2 ) ,"G" );
-		case 4 : return std::make_pair( digit_rm( val, factor2 ) ,"T" );
-		case 5 : return std::make_pair( digit_rm( val, factor2 ) ,"P" ); 
-		}
-	
+	switch (mode){
+		case convert_mode::up_metric:
+			while (val >= factor11 ){
+				val = val / factor11;
+				i++;
+				}
+			switch (i) {
+				case 0 : return std::make_pair( digit_rm( val, factor2 ) ,"_" ); 
+				case 1 : return std::make_pair( digit_rm( val, factor2 ) ,"K" ); 
+				case 2 : return std::make_pair( digit_rm( val, factor2 ) ,"M" ); 
+				case 3 : return std::make_pair( digit_rm( val, factor2 ) ,"G" );
+				case 4 : return std::make_pair( digit_rm( val, factor2 ) ,"T" );
+				case 5 : return std::make_pair( digit_rm( val, factor2 ) ,"P" ); 
+				}
+		case convert_mode::bit_metric:
+				val=val*factor12;
+				while (val >= factor12 ){
+				val = val / factor12;
+				i++;
+				}
+			switch (i) {
+				case 0 : return std::make_pair( digit_rm( val, factor2 ) ,"_" ); 
+				case 1 : return std::make_pair( digit_rm( val, factor2 ) ,"K" ); 
+				case 2 : return std::make_pair( digit_rm( val, factor2 ) ,"M" ); 
+				case 3 : return std::make_pair( digit_rm( val, factor2 ) ,"G" );
+				case 4 : return std::make_pair( digit_rm( val, factor2 ) ,"T" );
+				case 5 : return std::make_pair( digit_rm( val, factor2 ) ,"P" ); 
+				}
+		default:return std::make_pair(0,"_");
+
+		
+	}
 	return std::make_pair(0,"_");
 	}
 
@@ -94,6 +106,7 @@ class PC_info{
 		struct statvfs fiData;
 		statvfs(".",&fiData);
 		total_space =  fiData.f_blocks * fiData.f_bsize;
+		//get system info________________________________________________________________________
 
 	}
 
@@ -249,24 +262,33 @@ class Chart {
 		}
 	};
 
+void gotoxy(short x, short y) {
+#ifdef _WIN32
+    COORD coord = { x, y };
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+#else
+    printf("%c[%d;%df", 0x1B, y, x);
+#endif
+}
+
 int main (int argc, char **argv)
 {
     	struct winsize w;
 	constexpr int factor1 = 1024;
 	constexpr int factor2 = 100;
+	PC_info PC;
 
 	while(1){
 		//gotoxy(0,0);
 		sleep(1);
 	    	system("clear");
 
-		PC_info PC;
     		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		printf ("lines %d\n", w.ws_row);
     		printf ("columns %d\n", w.ws_col);
 		
-		auto x1 =  auto_range(PC.get_memory_info(), factor1, factor2);
-		auto x11 = auto_range(PC.total_RAM, factor1, factor2);
+		auto x1 =  auto_range(PC.get_memory_info(), convert_mode::bit_metric, factor2);
+		auto x11 = auto_range(PC.total_RAM, convert_mode::bit_metric, factor2);
 		auto x2 = digit_rm( PC.get_cpu_info() );
 		int x3 = PC.get_temp_info();
 		auto x4 = auto_range( PC.get_storage_info() );
