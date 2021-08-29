@@ -70,6 +70,39 @@ std::pair < double, std::string > auto_range (uint64_t x, convert_mode mode = co
 	return std::make_pair(0,"_");
 	}
 
+std::string readFile(std::string const& file)
+{
+    std::ifstream is(file);
+    if( !is.good() ){
+        throw std::runtime_error("Error: stream has errors.");
+    }
+    std::stringstream ss;
+    ss << is.rdbuf();
+	std::string m;
+	// Remove ending line character '\n' or '\r\n'.
+	std::getline(ss, m);
+    return m;
+}
+
+std::string olc_grep (std::string const& file, std::string const& info){
+		auto ifs = std::ifstream{file};
+		if(!ifs.good()){
+			throw std::runtime_error("Error: unable to memory-info file.");
+		}
+		std::string line, label; 
+		while( std::getline(ifs, line) )
+		{		
+			std::stringstream ss{line};	
+			while (ss >> label){
+			//ss >> label >> value;
+			if(label == info){
+				return line ;
+			}else{
+				continue;
+			}}
+		}
+	return "fie or label not found";
+	}
 
 class PC_info{
 
@@ -77,9 +110,8 @@ class PC_info{
 
 	public:
 	double total_RAM;
-	std::string CPU_info, system_info;
 	uint64_t total_space, received, sent;
-
+        std::string Machine_Hostname, Kernel_Version, OS_type, Kernel_compile_date, CPU_name;  
 
 	PC_info (){
 		//get the total RAM memory_______________________________________________________________
@@ -107,7 +139,11 @@ class PC_info{
 		statvfs(".",&fiData);
 		total_space =  fiData.f_blocks * fiData.f_bsize;
 		//get system info________________________________________________________________________
-
+		Machine_Hostname = readFile("/proc/sys/kernel/hostname");
+		Kernel_Version = readFile("/proc/sys/kernel/osrelease");
+		OS_type = readFile("/proc/sys/kernel/ostype");
+		Kernel_compile_date = readFile("/proc/sys/kernel/version");
+		CPU_name = "CPU " + olc_grep("/proc/cpuinfo","name"); 
 	}
 
 
@@ -284,8 +320,8 @@ int main (int argc, char **argv)
 	    	system("clear");
 
     		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-		printf ("lines %d\n", w.ws_row);
-    		printf ("columns %d\n", w.ws_col);
+		//printf ("lines %d\n", w.ws_row);
+    		//printf ("columns %d\n", w.ws_col);
 		
 		auto x1 =  auto_range(PC.get_memory_info(), convert_mode::bit_metric, factor2);
 		auto x11 = auto_range(PC.total_RAM, convert_mode::bit_metric, factor2);
@@ -297,7 +333,14 @@ int main (int argc, char **argv)
 		auto x51 = auto_range(x5.first);
 		auto x52 = auto_range(x5.second);
 		auto x6 = PC.get_runtime_info();
+		auto x7 = auto_range(PC.received);
+		auto x8 = auto_range(PC.sent);
 
+		//Static info___________________________________________________________________________
+		std::cout << PC.CPU_name << std::endl;
+		std::cout << "Machine_Hostname : " << PC.Machine_Hostname << std::endl;
+
+		//Variable info_________________________________________________________________________
 		std::cout << "Uptime: " << x6.first << " hours  " << x6.second << " minutes" << "\n";
 		std::cout << "RAM: " << x1.first << x1.second << "b used out of ";
 		std::cout << x11.first << x11.second << "b \n";
@@ -305,7 +348,7 @@ int main (int argc, char **argv)
 		std::cout << "CPU Temp: " << x3 << "°C \n";
 		std::cout << "Main Filesystem: " << x4.first << x4.second << "b free of " << x45.first << x45.second  << "b \n";
 		std::cout << "Network Data: " << x51.first << x51.second << "b/s received   " << x52.first << x52.second << "b/s sent" << "\n";
-
+		std::cout << "Total ⬇ " << x7.first << x7.second << "b  " << " Total ⬆ " << x8.first << x8.second << "b" << std::endl;
 	}
     return 0;  // make sure your main returns int
 
