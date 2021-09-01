@@ -1,12 +1,10 @@
-#include <sys/ioctl.h>
+//#include <sys/ioctl.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <time.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string> 
-#include <iomanip>  // std::seprecision, std::fixed 
 #include <math.h>
 #include <sys/statvfs.h>
 #include <cstring>
@@ -275,81 +273,4 @@ std::pair <int, int>  get_runtime_info(){
 
 };
 
-class Chart {
-	private:
-	double values[121];
-	std::string colors[5] = { "\x1B[31m", "\x1B[33m", "\x1B[93m", "\x1B[37m", "\x1B[36m" };
-	int prev_rel_x, prev_rel_y, prev_rel_w, prev_rel_h;
 
-	public:
-	double new_value;
-	int rel_x, rel_y;
-	int rel_w, rel_h;
-
-	Chart (){
-		
-		
-		}
-	void refresh_chart (){
-		
-		}
-	void resize_chart (){
-		
-		}
-	};
-
-void gotoxy(short x, short y) {
-#ifdef _WIN32
-    COORD coord = { x, y };
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-#else
-    printf("%c[%d;%df", 0x1B, y, x);
-#endif
-}
-
-int main (int argc, char **argv)
-{
-    	struct winsize w;
-	constexpr int factor1 = 1024;
-	constexpr int factor2 = 100;
-	PC_info PC;
-
-	while(1){
-		//gotoxy(0,0);
-		sleep(1);
-	    	system("clear");
-
-    		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-		//printf ("lines %d\n", w.ws_row);
-    		//printf ("columns %d\n", w.ws_col);
-		
-		auto x1 =  auto_range(PC.get_memory_info(), convert_mode::bit_metric, factor2);
-		auto x11 = auto_range(PC.total_RAM, convert_mode::bit_metric, factor2);
-		auto x2 = digit_rm( PC.get_cpu_info() );
-		int x3 = PC.get_temp_info();
-		auto x4 = auto_range( PC.get_storage_info() );
-		auto x45 = auto_range(PC.total_space);
-		auto x5 = PC.get_network_info();
-		auto x51 = auto_range(x5.first);
-		auto x52 = auto_range(x5.second);
-		auto x6 = PC.get_runtime_info();
-		auto x7 = auto_range(PC.received);
-		auto x8 = auto_range(PC.sent);
-
-		//Static info___________________________________________________________________________
-		std::cout << PC.CPU_name << std::endl;
-		std::cout << "Machine_Hostname : " << PC.Machine_Hostname << std::endl;
-
-		//Variable info_________________________________________________________________________
-		std::cout << "Uptime: " << x6.first << " hours  " << x6.second << " minutes" << "\n";
-		std::cout << "RAM: " << x1.first << x1.second << "b used out of ";
-		std::cout << x11.first << x11.second << "b \n";
-		std::cout << "CPU Usage: "<< x2 << "% \n";
-		std::cout << "CPU Temp: " << x3 << "°C \n";
-		std::cout << "Main Filesystem: " << x4.first << x4.second << "b free of " << x45.first << x45.second  << "b \n";
-		std::cout << "Network Data: " << x51.first << x51.second << "b/s received   " << x52.first << x52.second << "b/s sent" << "\n";
-		std::cout << "Total ⬇ " << x7.first << x7.second << "b  " << " Total ⬆ " << x8.first << x8.second << "b" << std::endl;
-	}
-    return 0;  // make sure your main returns int
-
-}
