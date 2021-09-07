@@ -50,7 +50,17 @@ int main (int argc, char **argv)
 		std::cout << s_format("Network Data   : " , GRN, H_BLK)<< x51.first << x51.second << "b/s received   " << x52.first << x52.second << "b/s sent" << "\n";
 		std::cout << s_format("                 Total ⬇ " , GRN, H_DEFAULT)<< x7.first << x7.second << "b  " << s_format("    Total ⬆ " , GRN, H_DEFAULT)<< x8.first << x8.second << "b" << std::endl;
 
-		static_info.display();
+		if ( w.ws_col<100 && w.ws_row<13 ){
+			// does / displays nothing
+			}else if(w.ws_col<100){
+				static_info.y=8;
+				static_info.x=0;
+				static_info.display();
+			}else{
+				static_info.y=0;
+				static_info.x=53;
+				static_info.display();
+			}
 	}
     return 0;
 

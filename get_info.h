@@ -99,7 +99,7 @@ std::string olc_grep (std::string const& file, std::string const& info){
 				continue;
 			}}
 		}
-	return "fie or label not found";
+	return "file or label not found";
 	}
 
 class PC_info{
