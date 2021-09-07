@@ -1,4 +1,6 @@
 #include "ui_methods.h"
+#include <vector>
+#include <iostream>
 
 class Chart {
 	private:
@@ -15,10 +17,60 @@ class Chart {
 		
 		
 		}
-	void refresh_chart (){
+	void display (){
 		
 		}
-	void resize_chart (){
+	void hide (){
 		
 		}
+	void update (){
+
+		}
+	};
+
+class Menu {
+	private:
+	
+	public:
+	Menu (){}
+	void up_opt(){}
+	void dwn_opt(){}
+	void display(){}
+	void hide(){}
+
+	};
+
+class Label {
+	public:
+	std::vector <std::string> content ;
+	short x,y;
+	std::vector <std::string> h = {H_BLK,H_DEFAULT};
+
+	Label ( std::string text , short x = 0, short y = 0){
+		this->x = x;
+		this->y = y;
+
+		int start = 0;
+		std::string del = "\n";
+		int end = text.find(del);
+		while (end != -1) {
+        
+			content.push_back(text.substr(start, end - start));
+        		start = end + del.size();
+        		end = text.find(del, start);
+		}
+		content.push_back(text.substr(start, end - start));
+
+	}
+	
+	void display(){
+		short x1=1, x2=0, x3=0;
+		for (int i=0;i<content.size();i++ ){
+			gotoxy(x,y+i);
+			std::cout << s_format( content[i], CYN, h[x1] ) ;
+			x3=x1; x1=x2; x2=x3;
+			}
+		gotoxy(0,0);
+		}
+	void hide(){}
 	};

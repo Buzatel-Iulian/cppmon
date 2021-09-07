@@ -1,4 +1,40 @@
 #include <string>
+#include <iostream>
+
+#ifdef _WIN32
+#include <conio.h>
+#else
+#include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>
+int kbhit(void)
+{
+  struct termios oldt, newt;
+  int ch;
+  int oldf;
+ 
+  tcgetattr(STDIN_FILENO, &oldt);
+  newt = oldt;
+  newt.c_lflag &= ~(ICANON | ECHO);
+  tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+  oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+  fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+ 
+  ch = getchar();
+ 
+  tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+  fcntl(STDIN_FILENO, F_SETFL, oldf);
+ 
+  if(ch != EOF)
+  {
+    ungetc(ch, stdin);
+    return 1;
+  }
+ 
+  return 0;
+}
+#endif
 
 //text
 #define BLK "\033[30m"
@@ -21,8 +57,8 @@
 #define H_CYN "\033[46m"
 #define H_WHT "\033[47m"
 
-#define DEFAULT "\033[39;49m"
-
+#define DEFAULT "\033[39m"
+#define H_DEFAULT "\033[49m"
 
 void gotoxy(short x, short y) {
 #ifdef _WIN32
@@ -33,7 +69,23 @@ void gotoxy(short x, short y) {
 #endif
 }
 
-std::string s_format (std::string text, std::string f_color, std::string bg_color){
-
+std::string s_format (std::string text, std::string f_color = BLK, std::string bg_color = H_WHT){
+	return f_color + bg_color + text + DEFAULT + H_DEFAULT;
 	return "blank ";
 	}
+
+#ifdef _WIN32
+    #include <windows.h>
+
+    void sleep_(unsigned milliseconds)
+    {
+        Sleep(milliseconds);
+    }
+#else
+    #include <unistd.h>
+
+    void sleep_(unsigned milliseconds)
+    {
+        usleep(milliseconds * 1000); // takes microseconds
+    }
+#endif

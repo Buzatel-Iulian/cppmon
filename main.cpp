@@ -7,20 +7,26 @@
 
 int main (int argc, char **argv)
 {
-    	//struct winsize w;
+    	struct winsize w;
 	constexpr int factor1 = 1024;
 	constexpr int factor2 = 100;
 	PC_info PC;
+	Label static_info ("\n" + PC.Machine_Hostname + "\n" + PC.Kernel_Version + "\n" + PC.Kernel_compile_date + "\n" + PC.OS_type + "\n" + PC.CPU_name , 53 , 0 );
+	char key;
 
 	while(1){
-		//gotoxy(0,0);
-		sleep(1);
+		sleep_(1000);
 	    	system("clear");
 
-    		//ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		//printf ("lines %d\n", w.ws_row);
     		//printf ("columns %d\n", w.ws_col);
 		
+		if(kbhit()){
+			key = getchar();
+			std::cout << key << std::endl;
+			}
+
 		auto x1 =  auto_range(PC.get_memory_info(), convert_mode::bit_metric, factor2);
 		auto x11 = auto_range(PC.total_RAM, convert_mode::bit_metric, factor2);
 		auto x2 = digit_rm( PC.get_cpu_info() );
@@ -34,19 +40,17 @@ int main (int argc, char **argv)
 		auto x7 = auto_range(PC.received);
 		auto x8 = auto_range(PC.sent);
 
-		//Static info___________________________________________________________________________
-		std::cout << PC.CPU_name << std::endl;
-		std::cout << "Machine_Hostname : " << PC.Machine_Hostname << std::endl;
-
 		//Variable info_________________________________________________________________________
-		std::cout << "Uptime: " << x6.first << " hours  " << x6.second << " minutes" << "\n";
-		std::cout << "RAM: " << x1.first << x1.second << "b used out of ";
+		std::cout << s_format("Uptime         : ", GRN, H_DEFAULT) << x6.first << " hours  " << x6.second << " minutes" << "\n";
+		std::cout << s_format("RAM            : " , GRN, H_BLK)<< x1.first << x1.second << "b used out of ";
 		std::cout << x11.first << x11.second << "b \n";
-		std::cout << "CPU Usage: "<< x2 << "% \n";
-		std::cout << "CPU Temp: " << x3 << "°C \n";
-		std::cout << "Main Filesystem: " << x4.first << x4.second << "b free of " << x45.first << x45.second  << "b \n";
-		std::cout << "Network Data: " << x51.first << x51.second << "b/s received   " << x52.first << x52.second << "b/s sent" << "\n";
-		std::cout << "Total ⬇ " << x7.first << x7.second << "b  " << " Total ⬆ " << x8.first << x8.second << "b" << std::endl;
+		std::cout << s_format("CPU Usage      : ", GRN, H_DEFAULT)<< x2 << "% \n";
+		std::cout << s_format("CPU Temp       : " , GRN, H_BLK)<< x3 << "°C \n";
+		std::cout << s_format("Main Filesystem: " , GRN, H_DEFAULT)<< x4.first << x4.second << "b free of " << x45.first << x45.second  << "b \n";
+		std::cout << s_format("Network Data   : " , GRN, H_BLK)<< x51.first << x51.second << "b/s received   " << x52.first << x52.second << "b/s sent" << "\n";
+		std::cout << s_format("                 Total ⬇ " , GRN, H_DEFAULT)<< x7.first << x7.second << "b  " << s_format("    Total ⬆ " , GRN, H_DEFAULT)<< x8.first << x8.second << "b" << std::endl;
+
+		static_info.display();
 	}
     return 0;
 

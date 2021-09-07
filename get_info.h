@@ -137,10 +137,10 @@ class PC_info{
 		statvfs(".",&fiData);
 		total_space =  fiData.f_blocks * fiData.f_bsize;
 		//get system info________________________________________________________________________
-		Machine_Hostname = readFile("/proc/sys/kernel/hostname");
-		Kernel_Version = readFile("/proc/sys/kernel/osrelease");
-		OS_type = readFile("/proc/sys/kernel/ostype");
-		Kernel_compile_date = readFile("/proc/sys/kernel/version");
+		Machine_Hostname = "Machine_Hostname    : " + readFile("/proc/sys/kernel/hostname");
+		Kernel_Version = "Kernel version      : " + readFile("/proc/sys/kernel/osrelease");
+		OS_type = "OS type             : " + readFile("/proc/sys/kernel/ostype");
+		Kernel_compile_date = "Kernel compile date : " + readFile("/proc/sys/kernel/version");
 		CPU_name = "CPU " + olc_grep("/proc/cpuinfo","name"); 
 	}
 
